@@ -143,11 +143,6 @@
             : "rgba(" + NAVY + "," + (0.18 + 0.72 * o.near).toFixed(3) + ")";
           if (hover <= 0) { ctx.fillStyle = "rgba(" + NAVY + "," + (0.18 + 0.72 * o.near).toFixed(3) + ")"; }
           ctx.beginPath(); ctx.arc(o.x, o.y, r + hover * 1.6, 0, 6.2832); ctx.fill();
-          /* petit reflet sur les points proches : effet bille */
-          if (o.near > 0.6) {
-            ctx.fillStyle = "rgba(255, 255, 255," + ((o.near - 0.6) * 0.9).toFixed(3) + ")";
-            ctx.beginPath(); ctx.arc(o.x - r * 0.3, o.y - r * 0.3, r * 0.35, 0, 6.2832); ctx.fill();
-          }
         }
       }
       if (mouse.on) {
