@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="{{lang}}" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{meta_title}}</title>
+<meta name="description" content="{{meta_description}}">
+<link rel="canonical" href="{{canonical}}">
+{{hreflang}}
+<meta name="theme-color" content="#F6F2EC">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NexusLab">
+<meta property="og:locale" content="{{locale}}">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:title" content="{{og_title}}">
+<meta property="og:description" content="{{og_description}}">
+<meta property="og:image" content="{{site_url}}/assets/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{og_image_alt}}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/style.css?v={{version}}">
+<script type="application/ld+json">{{jsonld}}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">{{skip}}</a>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="logo" href="{{home}}" aria-label="NexusLab, {{home_label}}">
+      {{logo_svg}}
+      <span class="logo-word">{{wordmark}}</span>
+    </a>
+    <nav class="nav-links" aria-label="{{nav_label}}">
+      {{nav_links}}
+    </nav>
+    <div class="nav-right">
+      <div class="lang" aria-label="{{lang_title}}">{{lang_switch}}</div>
+      <a class="btn btn-primary btn-sm nav-cta" href="#contact">{{nav_cta}}</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-panel" aria-label="{{menu_open}}" data-label-open="{{menu_open}}" data-label-close="{{menu_close}}">
+        <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="nav-panel" id="nav-panel" data-open="false">
+    {{nav_links}}
+    <a class="btn btn-primary" href="#contact">{{nav_cta}}</a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- Accueil -->
+  <section class="hero" aria-labelledby="hero-title">
+    <canvas class="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hero-veil" aria-hidden="true"></div>
+    {{hero_alps}}
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <p class="hero-eyebrow">{{hero_eyebrow}}</p>
+        <h1 id="hero-title">{{hero_title}}</h1>
+        <p class="lede">{{hero_lede}}</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contact">{{hero_cta_primary}}</a>
+          <a class="btn btn-ghost" href="#offres">{{hero_cta_secondary}}</a>
+        </div>
+      </div>
+      <ul class="hero-facts">
+        {{hero_facts}}
+      </ul>
+    </div>
+  </section>
+
+{{middle_sections}}
+  <!-- Contact -->
+  <section class="section contact" id="contact" aria-labelledby="contact-title">
+    <div class="container contact-grid">
+      <div class="reveal">
+        <p class="tag">{{contact_tag}}</p>
+        <h2 id="contact-title">{{contact_title}}</h2>
+        <ul class="contact-questions">
+          {{contact_questions}}
+        </ul>
+        <p class="contact-note">{{contact_no_answers}}</p>
+        <div class="contact-actions">
+          <a class="btn btn-primary" href="{{whatsapp_url}}" rel="noopener" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5.1A8 8 0 1 1 21 12z"/></svg>
+            {{contact_whatsapp}}
+          </a>
+          <a class="btn btn-outline-dark" href="tel:{{phone_tel}}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8.1 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.7a2 2 0 0 1 1.7 2z"/></svg>
+            {{contact_call}} {{phone_display}}
+          </a>
+        </div>
+        <p class="contact-reply">{{contact_reply}}</p>
+      </div>
+      <div class="form-card reveal">
+        <h3>{{form_title}}</h3>
+        <form action="https://formsubmit.co/{{form_email}}" method="POST">
+          <input type="hidden" name="_subject" value="{{form_subject}}">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="true">
+          <input type="hidden" name="_next" value="{{form_next}}">
+          <input type="hidden" name="_autoresponse" value="{{form_autoresponse}}">
+          <input type="text" name="_honey" class="honey" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="field-row">
+            <div class="field">
+              <label for="f-name">{{form_name}}</label>
+              <input id="f-name" name="Nom" type="text" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="f-company">{{form_company}} <small>({{form_optional}})</small></label>
+              <input id="f-company" name="Entreprise" type="text" autocomplete="organization">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f-email">{{form_email_label}}</label>
+              <input id="f-email" name="email" type="email" required autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="f-phone">{{form_phone}} <small>({{form_optional}})</small></label>
+              <input id="f-phone" name="Téléphone" type="tel" autocomplete="tel">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-message">{{form_message}}</label>
+            <textarea id="f-message" name="Message" required placeholder="{{form_message_placeholder}}"></textarea>
+          </div>
+          <div class="form-foot">
+            <p class="form-privacy">{{form_privacy}} <a href="{{privacy_url}}">{{form_privacy_link}}</a></p>
+            <button class="btn btn-primary" type="submit">{{form_submit}}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  {{footer_alps}}
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="{{home}}" aria-label="NexusLab, {{home_label}}">
+          {{logo_svg}}
+          <span class="logo-word">{{wordmark}}</span>
+        </a>
+        <p>{{footer_signature}}</p>
+        <p>{{footer_about}}</p>
+      </div>
+      <div class="footer-col">
+        <h4>{{footer_nav_title}}</h4>
+        <ul>{{footer_nav_links}}</ul>
+      </div>
+      <div class="footer-col">
+        <h4>{{footer_legal_title}}</h4>
+        <ul>{{footer_legal_links}}</ul>
+      </div>
+      <div class="footer-col">
+        <h4>{{footer_lang_title}}</h4>
+        <ul>{{footer_lang_links}}</ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span data-year>2026</span> {{footer_copyright}}</span>
+      <span class="made">{{footer_made}}</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js?v={{version}}" defer></script>
+</body>
+</html>
