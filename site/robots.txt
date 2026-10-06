@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /merci/
+Disallow: /de/danke/
+Disallow: /en/thank-you/
+
+Sitemap: https://nexus-lab.ch/sitemap.xml

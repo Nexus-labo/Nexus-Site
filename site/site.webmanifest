@@ -1,0 +1,14 @@
+{
+  "name": "NexusLab",
+  "short_name": "NexusLab",
+  "icons": [
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#F6F2EC",
+  "background_color": "#F6F2EC",
+  "display": "browser"
+}
