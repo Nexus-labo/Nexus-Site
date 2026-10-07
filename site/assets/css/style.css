@@ -805,14 +805,15 @@ a.case-shot:hover .shot-cta, a.case-shot:focus-visible .shot-cta { background: v
 .tools-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
 .tools-grid h2 { max-width: 13ch; }
 .tools-grid .lede { margin-top: 20px; }
-.tools-list { list-style: none; margin-top: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+.tools-list { list-style: none; margin-top: 32px; display: grid; grid-template-columns: 1fr; gap: 4px 16px; }
+/* sur ordinateur, une seule colonne : la liste défile à côté de la maquette collée, qui change d'écran au passage */
 [data-tool="factures"] { --acc: var(--t-factures); --acc-soft: var(--t-factures-soft); --acc-ink: var(--t-factures-ink); }
 [data-tool="planning"] { --acc: var(--t-planning); --acc-soft: var(--t-planning-soft); --acc-ink: var(--t-planning-ink); }
 [data-tool="tableau"]  { --acc: var(--t-tableau);  --acc-soft: var(--t-tableau-soft);  --acc-ink: var(--t-tableau-ink); }
 [data-tool="clients"]  { --acc: var(--t-clients);  --acc-soft: var(--t-clients-soft);  --acc-ink: var(--t-clients-ink); }
 [data-tool="rh"]       { --acc: var(--t-rh);       --acc-soft: var(--t-rh-soft);       --acc-ink: var(--t-rh-ink); }
 [data-tool="autre"]    { --acc: var(--t-autre);    --acc-soft: var(--t-autre-soft);    --acc-ink: var(--t-autre-ink); }
-.tool { position: relative; padding: 14px 14px 15px; border-radius: var(--radius-s); border: 1px solid transparent; transition: background 0.25s, border-color 0.25s; }
+.tool { position: relative; padding: 16px 16px 17px; border-radius: var(--radius-s); border: 1px solid transparent; transition: background 0.25s, border-color 0.25s; }
 .tool::before { content: ""; position: absolute; left: 14px; right: 14px; top: -3px; border-top: 1px solid var(--line); }
 .tool h3 { font-size: 1.0625rem; }
 .tool-btn { all: unset; cursor: pointer; display: flex; align-items: center; gap: 10px; font: inherit; color: inherit; font-weight: 700; }
@@ -829,7 +830,7 @@ a.case-shot:hover .shot-cta, a.case-shot:focus-visible .shot-cta { background: v
 .tools-proof { margin-top: 24px; padding: 16px 18px; border-radius: var(--radius-s); background: rgba(255, 255, 255, 0.7); border: 1px solid var(--line); color: var(--ink-2); font-size: 0.9375rem; }
 .tools-cta { margin-top: 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
 .tools-cta span { color: var(--ink-3); font-weight: 600; font-size: 0.9375rem; }
-@media (max-width: 960px) { .tools-grid { grid-template-columns: 1fr; } }
+@media (max-width: 960px) { .tools-grid { grid-template-columns: 1fr; } .tools-list { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .tools-list { grid-template-columns: 1fr; } }
 
 /* Maquette d'interface, dessinée en HTML (pas d'image) */
