@@ -551,6 +551,29 @@
     document.addEventListener("visibilitychange", function () { if (document.hidden) { skyStop(); } });
   }
 
+  /* Outils sur mesure : un clic sur un exemple (ou sur le menu de la maquette) affiche l'écran correspondant */
+  var mock = document.getElementById("outils-maquette");
+  if (mock) {
+    var toolBtns = document.querySelectorAll(".tool-btn, .mock-nav-btn");
+    var screens = mock.querySelectorAll(".mock-screen");
+    var narrow = window.matchMedia("(max-width: 960px)");
+    var showTool = function (key) {
+      if (mock.getAttribute("data-tool") === key) { return; }
+      mock.setAttribute("data-tool", key);
+      toolBtns.forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.tool === key ? "true" : "false"); });
+      screens.forEach(function (s) { s.hidden = s.dataset.screen !== key; });
+    };
+    toolBtns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        showTool(b.dataset.tool);
+        // Sur mobile, la maquette est sous la liste : on la fait venir à l'écran
+        if (narrow.matches && b.classList.contains("tool-btn")) {
+          mock.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+        }
+      });
+    });
+  }
+
   /* Année courante */
   var year = document.querySelector("[data-year]");
   if (year) { year.textContent = String(new Date().getFullYear()); }
