@@ -14,7 +14,7 @@ NBSP = " "
 
 meta = {
     "title": "NexusLab, sites web et outils digitaux pour les PME de Suisse romande",
-    "description": "NexusLab crée des sites web simples et des outils digitaux pour les PME et les indépendants de Suisse romande. Une équipe basée en Valais, un seul client à la fois, une offre écrite avant de commencer. Formules dès CHF 690.",
+    "description": "NexusLab crée des sites web simples et des outils digitaux pour les PME et les indépendants de Suisse romande. Une équipe basée en Valais, un seul client à la fois, une offre écrite avant de commencer. Formules à partir de CHF 690.",
     "og_title": "NexusLab, le lien entre votre métier et le digital",
     "og_description": "Sites web et outils digitaux pour les PME de Suisse romande. Un seul client à la fois, des prix clairs, une équipe que vous pouvez appeler.",
     "lang_label": "Français",
@@ -69,8 +69,8 @@ hero = {
 offers = {
     "tag": "Ce qu’on fait",
     "title": "Nos formules",
-    "intro": "La plupart des projets commencent par l’une de ces trois formules. Le prix exact dépend de ce que vous voulez y mettre, et on vous l’écrit avant de commencer.",
-    "from": "dès",
+    "intro": "La plupart des projets commencent par l’une de ces trois formules. Les montants affichés sont des prix de départ, pas des forfaits : le prix final dépend de ce que vous voulez y mettre, et on vous l’écrit avant de commencer.",
+    "from": "À partir de",
     "per_month": "par mois",
     "featured_label": "Notre conseil",
     "cards": [
@@ -114,7 +114,7 @@ offers = {
             "featured": False,
         },
     ],
-    "note": "Tarifs indicatifs, hors nom de domaine et hébergement (environ CHF 100 à 200 par an).",
+    "note": "Prix de départ, pas des prix fixes. Le montant final dépend de votre projet et figure dans une offre écrite, avant tout engagement. Nom de domaine et hébergement en plus (environ CHF 100 à 200 par an).",
     "more_title": "Un autre besoin?",
     "more_text": "Fiche Google, présence Instagram, outil pour vos factures ou vos horaires : parlons-en, on vous dira franchement si on peut le faire.",
     "more_cta": "Voir les outils sur mesure",
@@ -234,7 +234,7 @@ faq = {
     "aside": "Une autre question? Appelez-nous, c’est souvent plus rapide.",
     "items": [
         ("Combien coûte un site?",
-         "Un site d’une page démarre à CHF 690, un site complet à CHF 1’200. Le prix exact dépend de ce que vous voulez y mettre, et il est écrit avant de commencer. Le nom de domaine et l’hébergement coûtent en plus environ CHF 100 à 200 par an."),
+         "Un site d’une page coûte à partir de CHF 690, un site complet à partir de CHF 1’200. Le prix exact dépend de ce que vous voulez y mettre, et il est écrit avant de commencer. Le nom de domaine et l’hébergement coûtent en plus environ CHF 100 à 200 par an."),
         ("Combien de temps ça prend?",
          "En général, trois à six semaines entre notre premier échange et la mise en ligne, selon la formule et le temps qu’il vous faut pour nous transmettre vos contenus."),
         ("Est-ce que je peux modifier mon site moi-même?",
