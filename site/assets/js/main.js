@@ -165,13 +165,7 @@
         ctx.fillStyle = "rgb(" + CORAL + ")";
         ctx.beginPath(); ctx.arc(px, py, 2.4, 0, 6.2832); ctx.fill();
       }
-      /* ondes : un anneau qui s'élargit depuis le doigt ou le clic */
-      for (i = 0; i < ripples.length; i++) {
-        var rp = ripples[i], kk = Math.min(1, (time - rp.t0) / 1100), ease = 1 - Math.pow(1 - kk, 3);
-        ctx.strokeStyle = "rgba(" + CORAL + "," + (0.35 * (1 - kk)).toFixed(3) + ")";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.arc(rp.x, rp.y, 12 + ease * rp.max, 0, 6.2832); ctx.stroke();
-      }
+      /* ondes : invisibles, on ne voit que les points qui s'allument à leur passage (voir movePulses) */
       /* liens vers la souris (ordinateur uniquement) */
       if (mouse.on) {
         ctx.lineWidth = 1;
