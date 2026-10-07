@@ -77,210 +77,165 @@ HERO_ART = """<svg viewBox="0 0 520 440" fill="none" xmlns="http://www.w3.org/20
 
 # ---------------------------------------------------------------------------
 # Montagnes : silhouettes des Alpes générées une fois pour toutes (SVG léger, pas de photo).
-# Bruit « en crêtes » pour des sommets pointus, plus un sommet en pyramide inspiré du Cervin.
 import math
 import random
 
 
-def _ridge(width, base, amp, seed, freqs=(0.004, 0.009, 0.021, 0.047), step=8, peak=None):
+# ---------- Montagnes en aplats (style illustration) ----------
+# Chaque sommet est un triangle net : une face éclairée, une face à l'ombre séparée par une arête
+# en zigzag, une calotte de neige au bord dentelé. Pas de bruit, pas de crête hachée.
+
+def _pts(pts):
+    return " L".join("%.1f %.1f" % (x, y) for x, y in pts)
+
+
+def _poly(pts):
+    return "M" + _pts(pts) + " Z"
+
+
+def flat_peak(x, top, wl, wr, base, col, snow=0.26, seed=0):
+    """col = (éclairé, ombre, neige, neige à l'ombre, opacité neige). Lumière venant de droite."""
     rnd = random.Random(seed)
-    phases = [rnd.uniform(0, 6.283) for _ in freqs]
-    weights = [1.0, 0.55, 0.28, 0.12]
-    pts = []
-    for x in range(0, width + step, step):
-        h = 0.0
-        for f, ph, w in zip(freqs, phases, weights):
-            h += w * (1 - abs(math.sin(x * f + ph))) ** 1.6
-        h = h / sum(weights)
-        y = base - amp * h + rnd.uniform(-1.6, 1.6)
-        if peak:
-            y = min(y, peak(x))
-        pts.append((x, round(y, 1)))
-    return pts
+    lit, shade, snow_c, snow_s, snow_o = col
+    h = base - top
+    out = ['<path d="%s" fill="%s"/>' % (_poly([(x - wl, base), (x, top), (x + wr, base)]), lit)]
+    # face à l'ombre : du sommet vers la base, arête intérieure en zigzag
+    k1 = (x + wr * rnd.uniform(0.04, 0.1), top + h * rnd.uniform(0.28, 0.36))
+    k2 = (x - wl * rnd.uniform(0.02, 0.1), top + h * rnd.uniform(0.5, 0.6))
+    k3 = (x + wr * rnd.uniform(0.08, 0.2), top + h * rnd.uniform(0.74, 0.82))
+    k4 = (x + wr * rnd.uniform(0.0, 0.12), base)
+    out.append('<path d="%s" fill="%s"/>' % (_poly([(x, top), (x - wl, base), k4, k3, k2, k1]), shade))
+    if snow:
+        sl = top + h * snow
+        L = (x - wl * snow, sl)
+        R = (x + wr * snow, sl)
+        teeth, n = [], 5
+        for i in range(1, n):
+            t = i / n
+            tx = R[0] + (L[0] - R[0]) * t
+            ty = sl + (h * 0.07 if i % 2 else -h * 0.02) * rnd.uniform(0.7, 1.2)
+            teeth.append((tx, ty))
+        cap = [(x, top), R] + teeth + [L]
+        out.append('<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (_poly(cap), snow_c, snow_o))
+        # côté ombre de la neige
+        left_teeth = [p for p in teeth if p[0] < x]
+        cap_s = [(x, top), (k1[0] - (k1[0] - x) * 0.4, top + h * snow * 0.75)] + left_teeth + [L]
+        out.append('<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (_poly(cap_s), snow_s, snow_o))
+    return "".join(out)
 
 
-def _cervin(cx, top, half):
-    """Profil inspiré du Cervin : arête gauche longue et concave, sommet au nez légèrement penché,
-    face droite plus raide. Points relatifs (dx, dy) en unités de « half », interpolés en x."""
-    prof = [(-5.0, 4.2), (-2.2, 1.9), (-1.5, 1.35), (-1.0, 0.95), (-0.62, 0.62), (-0.36, 0.36), (-0.2, 0.17),
-            (-0.1, 0.05), (-0.03, 0.0), (0.04, 0.02), (0.08, 0.07), (0.12, 0.06), (0.2, 0.22),
-            (0.34, 0.5), (0.52, 0.86), (0.78, 1.25), (1.2, 1.7), (1.8, 2.1), (4.0, 3.6)]
-    pts = [(cx + dx * half, top + dy * half) for dx, dy in prof]
+def flat_cervin(cx, base_y, s, col):
+    """Le Cervin en aplats : arête gauche longue, nez penché, épaule à droite, calotte dentelée."""
+    lit, shade, snow_c, snow_s, snow_o = col
 
-    def f(x):
-        if x <= pts[0][0] or x >= pts[-1][0]:
-            return 10 ** 6
-        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
-            if x0 <= x <= x1:
-                return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
-        return 10 ** 6
-    return f
-
-
-def _path(pts, width, height):
-    d = "M0 %d " % height + " ".join("L%s %s" % (x, y) for x, y in pts) + " L%d %d Z" % (width, height)
-    return d
-
-
-def _rim(pts):
-    return "M" + " L".join("%s %s" % (x, y) for x, y in pts)
-
-
-def _cervin_shade(cx, top, half, height):
-    """Face à l'ombre du sommet (côté droit) : donne le relief de la pyramide."""
-    right = [(0.04, 0.02), (0.08, 0.07), (0.12, 0.06), (0.2, 0.22), (0.34, 0.5), (0.52, 0.86),
-             (0.78, 1.25), (1.2, 1.7), (1.8, 2.1), (4.0, 3.6)]
-    pts = [(cx - 0.03 * half, top)] + [(cx + dx * half, top + dy * half) for dx, dy in right]
-    pts = [(x, min(y, height)) for x, y in pts]
-    pts += [(cx + 0.9 * half, height), (cx + 0.05 * half, top + 1.2 * half), (cx - 0.02 * half, top + 0.3 * half)]
-    return "M" + " L".join("%s %s" % (round(x, 1), round(y, 1)) for x, y in pts) + " Z"
-
-
-def _snow(pts, snowline, seed):
-    """Calotte de neige : la partie de la crête au-dessus d'une limite irrégulière."""
-    rnd = random.Random(seed)
-    top = [(x, y) for x, y in pts]
-    bottom = []
-    for x, y in reversed(pts):
-        line = snowline + 14 * math.sin(x * 0.03 + rnd.uniform(0, 0.4)) + rnd.uniform(-6, 6)
-        bottom.append((x, max(y, line)))
-    return "M" + " L".join("%s %s" % (x, round(y, 1)) for x, y in top + bottom) + " Z"
-
-
-def matterhorn(cx, base_y, scale, night=False):
-    """Cervin vu de Zermatt, en aplats : arête du Hörnli au centre (face est éclairée à gauche,
-    face nord à l'ombre à droite), épaule sur l'arête droite, double sommet au nez penché,
-    calotte de neige, couloirs enneigés, bancs de roche et glacier au pied."""
     def T(pts):
-        return " L".join("%.1f %.1f" % (cx + x * scale, base_y - (380 - y) * scale) for x, y in pts)
-
-    def poly(pts):
-        return "M" + T(pts) + " Z"
-
-    outline = [(-300, 380), (-232, 300), (-176, 232), (-134, 176), (-100, 128), (-72, 88), (-50, 56),
-               (-32, 30), (-18, 12), (-9, 3), (-3, -1), (4, -4), (9, -3), (13, 1), (17, 0), (22, 3),
-               (30, 13), (42, 33), (55, 58), (66, 76), (82, 87), (100, 94), (116, 104), (130, 122),
-               (154, 162), (192, 222), (240, 296), (306, 380)]
-    shadow = [(4, -4), (9, -3), (13, 1), (17, 0), (22, 3), (30, 13), (42, 33), (55, 58), (66, 76),
-              (82, 87), (100, 94), (116, 104), (130, 122), (154, 162), (192, 222), (240, 296), (306, 380),
-              (72, 380), (56, 300), (40, 222), (28, 150), (18, 88), (10, 36)]
-    snow = [(-50, 56), (-32, 30), (-18, 12), (-9, 3), (-3, -1), (4, -4), (9, -3), (13, 1), (17, 0), (22, 3),
-            (30, 13), (42, 33), (55, 58), (49, 61), (44, 74), (39, 63), (33, 68), (28, 90), (23, 70),
-            (17, 64), (12, 84), (7, 66), (1, 62), (-5, 79), (-10, 60), (-17, 58), (-22, 71), (-28, 57),
-            (-36, 62), (-42, 55)]
-    shoulder = [(60, 70), (80, 84), (100, 92), (118, 104), (108, 112), (92, 106), (80, 112), (70, 98)]
-    couloirs = [  # couloirs de neige effilés sur la face nord, plus larges vers le bas
-        [(40, 104), (43, 103), (50, 150), (58, 204), (62, 236), (54, 238), (49, 200), (43, 150)],
-        [(78, 128), (81, 127), (92, 180), (106, 240), (114, 272), (105, 274), (96, 236), (86, 182)],
-        [(118, 170), (121, 170), (134, 220), (150, 280), (156, 306), (148, 308), (140, 278), (127, 222)],
-        [(26, 150), (28, 150), (33, 196), (38, 238), (33, 240), (29, 198)],
-    ]
-    ledges = [  # petites vires enneigées sur la face éclairée
-        [(-70, 112), (-46, 104), (-30, 108), (-48, 114)],
-        [(-112, 168), (-80, 158), (-62, 162), (-86, 172)],
-        [(-150, 226), (-112, 214), (-96, 220), (-126, 230)],
-        [(-46, 150), (-28, 144), (-20, 148), (-36, 154)],
-    ]
-    strata = [[(-128, 216), (-40, 196)], [(-162, 262), (-34, 236)], [(-204, 318), (-30, 286)],
-              [(-92, 168), (-26, 154)], [(-236, 360), (-20, 336)]]
-    glacier = [(150, 380), (178, 336), (214, 318), (252, 322), (282, 344), (306, 380)]
-    if night:
-        body, rock_shadow, snow_c, snow_o, line_c, rim_o = "#232326", "#161618", "#E5E5EA", 0.55, "#161618", 0.4
-    else:
-        body, rock_shadow, snow_c, snow_o, line_c, rim_o = "url(#mh-body)", "#1D1D1F", "#FFFFFF", 0.95, "#1D1D1F", 0.75
-    out = []
-    if not night:
-        out.append('<defs><linearGradient id="mh-body" x1="0" y1="0" x2="0" y2="1">'
-                   '<stop offset="0" stop-color="#B3B3B8"/><stop offset="1" stop-color="#E6E2DC"/></linearGradient></defs>')
-    out.append('<path d="%s" fill="%s"/>' % (poly(outline), body))
-    out += ['<path d="M%s" fill="none" stroke="%s" stroke-opacity="0.09" stroke-width="%.1f" stroke-linecap="round"/>'
-            % (T(l), line_c, 1.6 * scale) for l in strata]
-    out.append('<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (poly(snow), snow_c, snow_o))
-    out.append('<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (poly(shoulder), snow_c, snow_o * 0.9))
-    out += ['<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (poly(c), snow_c, snow_o * 0.42) for c in couloirs]
-    out += ['<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (poly(c), snow_c, snow_o * 0.7) for c in ledges]
-    out.append('<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (poly(glacier), snow_c, snow_o * 0.6))
-    out.append('<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (poly(shadow), rock_shadow, 0.17 if not night else 0.45))
-    out.append('<path d="M%s" fill="none" stroke="#FFFFFF" stroke-opacity="%.2f" stroke-width="%.1f" stroke-linejoin="round"/>'
-               % (T(outline[1:-1]), rim_o, 1.3 * max(scale, 0.8)))
+        return [(cx + x * s, base_y - (380 - y) * s) for x, y in pts]
+    outline = [(-300, 380), (-190, 250), (-110, 150), (-52, 72), (-16, 22), (0, 0), (9, -5), (16, -2),
+               (21, 8), (40, 42), (62, 70), (92, 92), (118, 112), (150, 160), (210, 250), (310, 380)]
+    shade_poly = [(-300, 380), (-190, 250), (-110, 150), (-52, 72), (-16, 22), (0, 0), (-4, 48),
+                  (14, 104), (-6, 168), (18, 252), (2, 380)]
+    cap = [(-46, 64), (-16, 22), (0, 0), (9, -5), (16, -2), (21, 8), (40, 42), (56, 64), (60, 78),
+           (48, 72), (40, 92), (30, 76), (18, 98), (8, 80), (-4, 96), (-14, 78), (-26, 88), (-34, 70)]
+    cap_s = [(-46, 64), (-16, 22), (0, 0), (-3, 40), (-4, 96), (-14, 78), (-26, 88), (-34, 70)]
+    shoulder = [(62, 70), (92, 92), (118, 112), (104, 116), (90, 108), (78, 118), (70, 100)]
+    out = ['<path d="%s" fill="%s"/>' % (_poly(T(outline)), lit),
+           '<path d="%s" fill="%s"/>' % (_poly(T(shade_poly)), shade),
+           '<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (_poly(T(cap)), snow_c, snow_o),
+           '<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (_poly(T(cap_s)), snow_s, snow_o),
+           '<path d="%s" fill="%s" fill-opacity="%.2f"/>' % (_poly(T(shoulder)), snow_c, snow_o * 0.9)]
     return '<g class="matterhorn">%s</g>' % "".join(out)
+
+
+def hills(width, height, base, crests, fill, extra=""):
+    """Collines arrondies : crests = [(x, y), ...] reliées par des courbes douces."""
+    d = "M0 %d L0 %.1f" % (height, base)
+    px, py = 0, base
+    for x, y in crests + [(width, base)]:
+        mx = (px + x) / 2
+        d += " C%.1f %.1f %.1f %.1f %.1f %.1f" % (mx, py, mx, y, x, y)
+        px, py = x, y
+    d += " L%d %d Z" % (width, height)
+    return '<path d="%s" fill="%s"%s/>' % (d, fill, extra)
+
+
+def hill_y(width, base, crests, x):
+    """Hauteur approximative de la colline en x (pour poser les lumières des villages)."""
+    pts = [(0, base)] + crests + [(width, base)]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        if x0 <= x <= x1:
+            t = (x - x0) / (x1 - x0)
+            t = t * t * (3 - 2 * t)
+            return y0 + (y1 - y0) * t
+    return base
 
 
 def alps_hero():
     W, H = 1600, 520
-    far = _ridge(W, 330, 190, 3)
-    mid = _ridge(W, 430, 150, 7)
-    near = _ridge(W, 480, 105, 11, freqs=(0.006, 0.013, 0.03, 0.06))
-    front = _ridge(W, 518, 50, 19, freqs=(0.003, 0.008, 0.02, 0.05))
-    grad = lambda i, a, b: (
-        '<linearGradient id="alps-g%d" x1="0" y1="0" x2="0" y2="1">'
-        '<stop offset="0" stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient>' % (i, a, b))
+    far = (("#E2E2E6", "#D5D5DA", "#FFFFFF", "#EDEDF1", 0.95))
+    mid = (("#C9C9CE", "#B4B4BA", "#FFFFFF", "#E6E6EB", 0.97))
+    cerv = (("#B9B9BF", "#9E9EA5", "#FFFFFF", "#E4E4E9", 0.97))
+    far_peaks = "".join(flat_peak(*p, col=far, seed=i) for i, p in enumerate([
+        (60, 300, 240, 220, 470), (390, 262, 260, 250, 470), (720, 300, 230, 210, 470),
+        (990, 270, 240, 260, 470), (1440, 250, 250, 240, 470), (1600, 300, 200, 200, 470)]))
+    mid_peaks = "".join(flat_peak(*p, col=mid, seed=10 + i) for i, p in enumerate([
+        (230, 336, 230, 210, 500), (560, 352, 200, 230, 500), (860, 366, 190, 170, 500),
+        (1530, 330, 210, 200, 500)]))
+    near = hills(W, H, 470, [(180, 438), (520, 462), (820, 430), (1120, 458), (1420, 436)], "url(#alps-g3)")
+    front = hills(W, H, 505, [(260, 488), (640, 500), (1000, 484), (1360, 498)], "#FAF9F7")
     return (
         '<svg class="hero-alps" viewBox="0 0 %d %d" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">'
-        '<defs>%s%s%s</defs>'
-        '<g class="alps-layer" data-depth="0.25"><path d="%s" fill="url(#alps-g1)"/>'
-        '<path d="%s" fill="#FFFFFF" fill-opacity="0.85"/></g>'
-        '<g class="alps-layer" data-depth="0.5"><path d="%s" fill="url(#alps-g2)"/>'
-        '<path d="%s" fill="#FFFFFF" fill-opacity="0.92"/>'
-        '<path d="%s" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="1.3"/>'
-        '%s</g>'
-        '<g class="alps-layer" data-depth="0.8"><path d="%s" fill="url(#alps-g3)"/>'
-        '<path d="%s" fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="1.1"/></g>'
-        '<g class="alps-layer" data-depth="1.1"><path d="%s" fill="#FAF9F7"/></g>'
+        '<defs><linearGradient id="alps-g3" x1="0" y1="0" x2="0" y2="1">'
+        '<stop offset="0" stop-color="#DEDCD8"/><stop offset="1" stop-color="#F3F1EE"/></linearGradient></defs>'
+        '<g class="alps-layer" data-depth="0.25">%s</g>'
+        '<g class="alps-layer" data-depth="0.5">%s%s</g>'
+        '<g class="alps-layer" data-depth="0.8">%s</g>'
+        '<g class="alps-layer" data-depth="1.1">%s</g>'
         '</svg>'
-    ) % (W, H,
-         grad(1, "#D9D7D6", "#EEEAE4"), grad(2, "#BEBEC3", "#E9E5DF"), grad(3, "#A0A0A6", "#E3DFD9"),
-         _path(far, W, H), _snow(far, 186, 31),
-         _path(mid, W, H), _snow(mid, 128, 37), _rim(mid), matterhorn(1230, 470, 1.0),
-         _path(near, W, H), _rim(near),
-         _path(front, W, H))
+    ) % (W, H, far_peaks, mid_peaks, flat_cervin(1230, 470, 1.0, cerv), near, front)
 
 
 def alps_footer():
     W, H = 1600, 110
-    back = _ridge(W, 96, 70, 23)
-    front = _ridge(W, 110, 52, 29, peak=_cervin(320, 30, 40))
+    tri = lambda x, t, wl, wr: '<path d="%s"/>' % _poly([(x - wl, H), (x, t), (x + wr, H)])
+    back = "".join(tri(*p) for p in [(90, 40, 140, 130), (420, 30, 170, 150), (760, 46, 150, 140),
+                                       (1060, 34, 160, 170), (1380, 42, 150, 160), (1600, 50, 120, 120)])
+    front = "".join(tri(*p) for p in [(180, 62, 160, 150), (320, 18, 90, 70), (560, 64, 170, 160),
+                                        (900, 58, 180, 170), (1240, 66, 170, 160), (1520, 60, 150, 140)])
     return (
         '<svg class="footer-alps" viewBox="0 0 %d %d" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
-        '<path d="%s" fill="#1D1D1F" fill-opacity="0.45"/><path d="%s" fill="#1D1D1F"/></svg>'
-    ) % (W, H, _path(back, W, H), _path(front, W, H))
+        '<g fill="#1D1D1F" opacity="0.45">%s</g><g fill="#1D1D1F">%s<path d="M0 %d L0 104 L%d 104 L%d %d Z"/></g></svg>'
+    ) % (W, H, back, front, H, W, W, H)
 
 
 def alps_night():
-    """Paysage nocturne : crêtes éclairées par la lune, neige pâle, lumières de villages en corail."""
+    """Paysage nocturne en aplats : sommets éclairés par la lune, lumières de villages en corail."""
     W, H = 1600, 300
-    far = _ridge(W, 190, 150, 41)
-    mid = _ridge(W, 240, 150, 43)
-    near = _ridge(W, 278, 95, 47, freqs=(0.006, 0.013, 0.03, 0.06))
-    front = _ridge(W, 300, 48, 53, freqs=(0.003, 0.008, 0.02, 0.05))
+    far = (("#2E2E32", "#26262A", "#E5E5EA", "#C7C7CC", 0.22))
+    mid = (("#242427", "#1D1D20", "#E5E5EA", "#C7C7CC", 0.3))
+    far_peaks = "".join(flat_peak(*p, col=far, seed=30 + i) for i, p in enumerate([
+        (120, 80, 230, 210, 260), (480, 60, 250, 240, 260), (860, 95, 220, 230, 260),
+        (1180, 70, 240, 230, 260), (1520, 85, 220, 220, 260)]))
+    mid_peaks = "".join(flat_peak(*p, col=mid, seed=40 + i) for i, p in enumerate([
+        (720, 140, 200, 190, 285), (1020, 150, 190, 200, 285), (1360, 130, 210, 200, 285)]))
+    near_crests = [(160, 252), (520, 270), (860, 246), (1150, 266), (1440, 250)]
     rnd = random.Random(59)
     lights = []
-    # villages : petits groupes de lumières sur les pentes du plan proche
     for cx in (180, 520, 860, 1130, 1420):
-        base_y = dict(near).get(cx - cx % 8, 260)
+        base_y = hill_y(W, 268, near_crests, cx)
         for _ in range(rnd.randint(3, 7)):
             x = cx + rnd.uniform(-38, 38)
-            y = base_y + rnd.uniform(14, 34)
+            y = base_y + rnd.uniform(10, 26)
             if y < H - 4:
                 lights.append('<circle class="village" cx="%.1f" cy="%.1f" r="%.1f" style="animation-delay:-%.1fs"/>'
                               % (x, y, rnd.uniform(1.1, 2.0), rnd.uniform(0, 6)))
     return (
         '<svg class="night-alps" viewBox="0 0 %d %d" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">'
-        '<defs><radialGradient id="glow-v"><stop offset="0" stop-color="#FFB37A" stop-opacity="0.55"/>'
-        '<stop offset="1" stop-color="#FFB37A" stop-opacity="0"/></radialGradient></defs>'
-        '<path d="%s" fill="#2E2E32"/><path d="%s" fill="#E5E5EA" fill-opacity="0.16"/>'
-        '<path d="%s" fill="none" stroke="#C7C7CC" stroke-opacity="0.22" stroke-width="1"/>'
-        '<path d="%s" fill="#232326"/><path d="%s" fill="#E5E5EA" fill-opacity="0.22"/>'
-        '<path d="%s" fill="none" stroke="#C7C7CC" stroke-opacity="0.38" stroke-width="1.2"/>'
-        '%s'
-        '<path d="%s" fill="#1A1A1D"/>'
-        '<path d="%s" fill="#111113"/>'
-        '<g class="villages">%s</g>'
+        '%s%s%s%s%s<g class="villages">%s</g>'
         '</svg>'
-    ) % (W, H,
-         _path(far, W, H), _snow(far, 92, 61), _rim(far),
-         _path(mid, W, H), _snow(mid, 76, 67), _rim(mid), matterhorn(420, 292, 0.68, night=True),
-         _path(near, W, H), _path(front, W, H), "".join(lights))
+    ) % (W, H, far_peaks, flat_cervin(420, 292, 0.62, mid), mid_peaks,
+         hills(W, H, 268, near_crests, "#1A1A1D"),
+         hills(W, H, 292, [(300, 284), (760, 292), (1200, 282)], "#111113"),
+         "".join(lights))
 
 
 SWISS_FLAG = (
@@ -636,10 +591,14 @@ def middle_sections(c):
     figure = ""
     if k.get("figure"):
         figure = '<p class="case-figure reveal"><b>%s</b> %s</p>' % (esc(k["figure"][0]), esc(k["figure"][1]))
-    shot = ('<figure class="case-shot project reveal" tabindex="0"><img src="/assets/img/%s-800.webp" '
+    # La capture est elle-même un lien vers le site du client (demande de Mehdi, 07.10)
+    shot = ('<a class="case-shot project reveal" href="%s" rel="noopener" target="_blank" aria-label="%s">'
+            '<img src="/assets/img/%s-800.webp" '
             'srcset="/assets/img/%s-800.webp 800w, /assets/img/%s-1400.webp 1400w" sizes="(max-width: 920px) 100vw, 700px" '
-            'width="1400" height="875" loading="lazy" decoding="async" alt="%s"></figure>'
-            % (k["image"], k["image"], k["image"], esc(k["image_alt"])))
+            'width="1400" height="875" loading="lazy" decoding="async" alt="%s">'
+            '<span class="shot-cta" aria-hidden="true">%s %s</span></a>'
+            % (esc(k["url"]), esc(k["shot_label"]), k["image"], k["image"], k["image"], esc(k["image_alt"]),
+               esc(k["shot_cta"]), ICONS["arrow"]))
     H.append(
         '<section class="section case" id="realisations" aria-labelledby="realisations-title"><div class="container">'
         '<div class="case-head reveal">%s<h2 id="realisations-title">%s</h2>'
