@@ -57,11 +57,14 @@
     var ctx = canvas.getContext("2d", { alpha: true });
     var finePointer = canHover;
     var nodes = [], proj = [], order = [], W = 0, H = 0, dpr = 1, raf = 0, running = false, visible = true;
-    var NAVY = "20, 33, 61", CORAL = "255, 107, 87";
+    var NAVY = "29, 29, 31", CORAL = "255, 95, 87";
     var BX = 0, BY = 0, BZ = 0, F = 1, LINK = 200, LINK2 = LINK * LINK;
     var mouse = { x: 0, y: 0, sx: -9999, sy: -9999, on: false };
     var cam = { yaw: 0, pitch: 0 };
     var BUCKETS = 6, segNavy = [], segCoral = [];
+    /* signaux qui circulent le long des liens, ondes au toucher ou au clic */
+    var adj = [], pulses = [], ripples = [], nextPulse = 0, lastT = 0;
+    var MAXP = finePointer ? 7 : 5;
     for (var bi = 0; bi < BUCKETS; bi++) { segNavy.push([]); segCoral.push([]); }
 
     /* halo corail pré-dessiné */
@@ -119,6 +122,7 @@
       ctx.clearRect(0, 0, W, H);
       var i, j, a, b, pa, pb, dx, dy, dz, d2, k, depth, lvl, list;
       for (i = 0; i < BUCKETS; i++) { segNavy[i].length = 0; segCoral[i].length = 0; }
+      for (i = 0; i < nodes.length; i++) { if (adj[i]) { adj[i].length = 0; } else { adj[i] = []; } }
       /* liens : calculés dans l'espace 3D, classés par intensité */
       for (i = 0; i < nodes.length; i++) {
         a = nodes[i]; pa = proj[i];
@@ -134,6 +138,7 @@
             lvl = Math.min(BUCKETS - 1, (k * BUCKETS) | 0);
             list = (a.coral || b.coral) ? segCoral[lvl] : segNavy[lvl];
             list.push(pa.x, pa.y, pb.x, pb.y);
+            adj[i].push(j); adj[j].push(i);
           }
         }
       }
@@ -148,6 +153,24 @@
           for (i = 0; i < list.length; i += 4) { ctx.moveTo(list[i], list[i + 1]); ctx.lineTo(list[i + 2], list[i + 3]); }
           ctx.stroke();
         }
+      }
+      /* signaux : une lueur corail qui parcourt le lien, avec sa traînée */
+      ctx.lineWidth = 1.6;
+      for (i = 0; i < pulses.length; i++) {
+        var pu = pulses[i], A = proj[pu.a], B = proj[pu.b];
+        var px = A.x + (B.x - A.x) * pu.t, py = A.y + (B.y - A.y) * pu.t;
+        ctx.strokeStyle = "rgba(" + CORAL + ",0.55)";
+        ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(px, py); ctx.stroke();
+        ctx.drawImage(glow, px - 13, py - 13, 26, 26);
+        ctx.fillStyle = "rgb(" + CORAL + ")";
+        ctx.beginPath(); ctx.arc(px, py, 2.4, 0, 6.2832); ctx.fill();
+      }
+      /* ondes : un anneau qui s'élargit depuis le doigt ou le clic */
+      for (i = 0; i < ripples.length; i++) {
+        var rp = ripples[i], kk = Math.min(1, (time - rp.t0) / 1100), ease = 1 - Math.pow(1 - kk, 3);
+        ctx.strokeStyle = "rgba(" + CORAL + "," + (0.35 * (1 - kk)).toFixed(3) + ")";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(rp.x, rp.y, 12 + ease * rp.max, 0, 6.2832); ctx.stroke();
       }
       /* liens vers la souris (ordinateur uniquement) */
       if (mouse.on) {
@@ -182,6 +205,12 @@
             : "rgba(" + NAVY + "," + (0.2 + 0.65 * o.near).toFixed(3) + ")";
           r = r + hover * 1.5;
         }
+        var fl = o.n.flash ? Math.max(0, 1 - (time - o.n.flash) / 550) : 0;
+        if (fl > 0) {
+          ctx.globalAlpha = fl; ctx.drawImage(glow, o.x - r * 5, o.y - r * 5, r * 10, r * 10); ctx.globalAlpha = 1;
+          ctx.fillStyle = "rgba(" + CORAL + "," + (0.5 + 0.5 * fl).toFixed(3) + ")";
+          r = r + fl * 1.5;
+        }
         ctx.beginPath(); ctx.arc(o.x, o.y, r, 0, 6.2832); ctx.fill();
       }
       if (mouse.on) {
@@ -189,6 +218,56 @@
         ctx.fillStyle = "rgb(" + CORAL + ")";
         ctx.beginPath(); ctx.arc(mouse.sx, mouse.sy, 3.5, 0, 6.2832); ctx.fill();
       }
+    };
+
+    var launch = function (from, hops, time) {
+      var list = adj[from];
+      if (!list || !list.length || pulses.length >= MAXP + 4) { return; }
+      pulses.push({ a: from, b: list[(Math.random() * list.length) | 0], t: 0, hops: hops });
+      nodes[from].flash = time;
+    };
+    var movePulses = function (time, dt) {
+      if (time > nextPulse && pulses.length < MAXP) {
+        nextPulse = time + 500 + Math.random() * 700;
+        /* départ de préférence depuis un point proche de la caméra, plus visible */
+        var best = -1, bn = -1;
+        for (var s = 0; s < 6; s++) {
+          var c = (Math.random() * nodes.length) | 0;
+          if (proj[c] && adj[c] && adj[c].length && proj[c].near > bn) { bn = proj[c].near; best = c; }
+        }
+        if (best >= 0) { launch(best, 3 + ((Math.random() * 4) | 0), time); }
+      }
+      for (var i = pulses.length - 1; i >= 0; i--) {
+        var pu = pulses[i], A = proj[pu.a], B = proj[pu.b];
+        if (!A || !B || !adj[pu.a] || adj[pu.a].indexOf(pu.b) < 0) { pulses.splice(i, 1); continue; }   /* lien rompu */
+        var len = Math.max(20, Math.sqrt((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y)));
+        pu.t += dt * 0.32 / len;
+        if (pu.t >= 1) {
+          nodes[pu.b].flash = time;
+          var nx = adj[pu.b] ? adj[pu.b].filter(function (n) { return n !== pu.a; }) : [];
+          if (--pu.hops > 0 && nx.length) { pu.a = pu.b; pu.b = nx[(Math.random() * nx.length) | 0]; pu.t = 0; }
+          else { pulses.splice(i, 1); }
+        }
+      }
+      for (var r = ripples.length - 1; r >= 0; r--) {
+        var rp = ripples[r], age = time - rp.t0, rad = 12 + (1 - Math.pow(1 - Math.min(1, age / 1100), 3)) * rp.max;
+        /* les points touchés par l'anneau s'allument au passage */
+        for (var n = 0; n < proj.length; n++) {
+          var q = proj[n], d = Math.sqrt((q.x - rp.x) * (q.x - rp.x) + (q.y - rp.y) * (q.y - rp.y));
+          if (Math.abs(d - rad) < 14 && q.near > 0.35 && !q.n.rip && (!q.n.flash || time - q.n.flash > 500)) { q.n.rip = rp.t0; q.n.flash = time; }
+        }
+        if (age > 1100) { ripples.splice(r, 1); }
+      }
+    };
+    var poke = function (x, y) {
+      var time = performance.now();
+      ripples.push({ x: x, y: y, t0: time, max: Math.min(320, Math.max(W, H) * 0.28) });
+      for (var z = 0; z < nodes.length; z++) { nodes[z].rip = 0; }
+      if (ripples.length > 3) { ripples.shift(); }
+      /* les trois points les plus proches envoient chacun un signal */
+      var near = proj.map(function (q, i) { return { i: i, d: (q.x - x) * (q.x - x) + (q.y - y) * (q.y - y) }; })
+        .sort(function (u, v) { return u.d - v.d; }).slice(0, 3);
+      near.forEach(function (c) { launch(c.i, 4, time); });
     };
 
     var last = 0, lastDraw = 0;
@@ -211,7 +290,7 @@
       var ease = 1 - Math.pow(0.94, f);
       cam.yaw += (ty - cam.yaw) * ease;
       cam.pitch += (tp - cam.pitch) * ease;
-      try { project(); draw(time); } catch (err) { /* une image ratée ne bloque pas les suivantes */ }
+      try { project(); movePulses(time, dt); draw(time); } catch (err) { /* une image ratée ne bloque pas les suivantes */ }
     };
     var start = function () { if (!running && !reduced && visible && !document.hidden && W) { running = true; last = 0; lastDraw = 0; raf = window.requestAnimationFrame(step); } };
     var stop = function () { running = false; window.cancelAnimationFrame(raf); };
@@ -229,6 +308,12 @@
       }, 150);
     });
     var hero = canvas.parentNode;
+    /* toucher (ou cliquer) dans l'accueil : une onde part du doigt, sans gêner le défilement */
+    hero.addEventListener("pointerdown", function (e) {
+      if (reduced || e.target.closest("a, button, input, textarea, label")) { return; }
+      var r = canvas.getBoundingClientRect();
+      poke(e.clientX - r.left, e.clientY - r.top);
+    }, { passive: true });
     if (finePointer) {
       hero.addEventListener("pointermove", function (e) {
         if (e.pointerType !== "mouse") { return; }
@@ -502,7 +587,7 @@
         var st = stars[i];
         var tw = reduced ? 1 : 0.65 + 0.35 * Math.sin(t / 1000 * st.s + st.p);
         sc.globalAlpha = st.a * tw * (1 - Math.max(0, (st.y / SH - 0.55) * 1.6));
-        sc.fillStyle = st.r > 1.2 ? "#FFF6E3" : "#DCE4F5";
+        sc.fillStyle = st.r > 1.2 ? "#FFF6E3" : "#E5E5EA";
         sc.beginPath(); sc.arc(st.x, st.y, st.r, 0, 6.2832); sc.fill();
         if (st.r > 1.2) {
           sc.globalAlpha *= 0.25;
