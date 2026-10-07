@@ -493,22 +493,102 @@ def middle_sections(c):
         % (tag(c.offers["tag"]), esc(c.offers["title"]), esc(c.offers["intro"]), "".join(cards), esc(c.offers["note"]),
            esc(c.offers["more_title"]), esc(c.offers["more_text"]), esc(c.offers["more_cta"])))
 
-    # Outils sur mesure : texte et exemples à gauche, maquette d'interface dessinée en code à droite
+    # Outils sur mesure : exemples cliquables à gauche, maquette d'interface dessinée en code à droite.
+    # Chaque exemple a une clé (tools["keys"]) qui donne sa couleur (style.css) et son écran dans la maquette.
     t = c.tools
-    ex = "".join('<li class="tool reveal"><h3>%s</h3><p>%s</p></li>' % (esc(a), esc(b)) for a, b in t["examples"])
-    nav = "".join('<li%s>%s</li>' % (' class="on"' if n == t["mock_title"] else "", esc(n)) for n in t["mock_nav"])
+    keys = t["keys"]
+    first = keys[0]
+
+    def pressed(k):
+        return "true" if k == first else "false"
+
+    ex = "".join(
+        '<li class="tool reveal" data-tool="%s"><h3><button type="button" class="tool-btn" data-tool="%s" aria-pressed="%s" aria-controls="ecran-%s">%s</button></h3><p>%s</p></li>'
+        % (k, k, pressed(k), k, esc(a), esc(b)) for k, (a, b) in zip(keys, t["examples"]))
+    nav = "".join(
+        '<li><button type="button" class="mock-nav-btn" data-tool="%s" aria-pressed="%s" aria-controls="ecran-%s">%s</button></li>'
+        % (k, pressed(k), k, esc(n)) for k, n in zip(keys, t["mock_nav"]))
+
+    def head(title, new=None):
+        btn = '<span class="mock-btn" aria-hidden="true">+ %s</span>' % esc(new) if new else ""
+        return '<div class="mock-head"><h4>%s</h4>%s</div>' % (esc(title), btn)
+
+    screens = {}
+    # Factures et devis : l'écran d'origine
     rows = "".join(
         '<tr><td class="mono">%s</td><td>%s</td><td class="mono num">%s</td><td><span class="chip %s">%s</span></td></tr>'
         % (esc(a), esc(b), esc(cc), st, esc(t["mock_status"][st])) for a, b, cc, st in t["mock_rows"])
+    screens["factures"] = (
+        head(t["mock_title"], t["mock_new"]) +
+        '<div class="mock-kpi"><span>%s</span><b>%s</b>'
+        '<svg class="mock-spark" viewBox="0 0 96 34" aria-hidden="true"><path d="M2 28 L16 24 L28 26 L40 17 L52 20 L64 11 L78 13 L94 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+        '<table class="mock-table"><tbody>%s</tbody></table>'
+        % (esc(t["mock_total"]), esc(t["mock_total_value"]), rows))
+    # Planning des équipes
+    p = t["planning"]
+    cells = ""
+    for name, slots in p["rows"]:
+        tds = ""
+        for sl in slots:
+            if sl is None:
+                tds += '<td><span class="slot slot-free"></span></td>'
+            else:
+                swap = '<em class="mock-badge">%s</em>' % esc(p["swap"]) if len(sl) > 2 and sl[2] else ""
+                tds += '<td%s><span class="slot slot-%s%s">%s%s</span></td>' % (' colspan="2"' if swap else "", sl[1], " slot-swap" if swap else "", swap, esc(sl[0]))
+        cells += '<tr><th scope="row">%s</th>%s</tr>' % (esc(name), tds)
+    screens["planning"] = (
+        head(p["title"], p["new"]) +
+        '<table class="mock-plan"><thead><tr><td></td>%s</tr></thead><tbody>%s</tbody></table>'
+        % ("".join("<th>%s</th>" % esc(d) for d in p["days"]), cells))
+    # Tableau de bord
+    d = t["tableau"]
+    kp = "".join('<div class="mock-stat%s"><span>%s</span><b>%s</b><small>%s</small></div>'
+                 % (" is-main" if i == 0 else "", esc(a), esc(b), esc(cc)) for i, (a, b, cc) in enumerate(d["kpis"]))
+    bars = "".join('<li%s><i style="--h:%d%%"></i><span>%s</span></li>' % (' class="is-now"' if i == len(d["bars"]) - 1 else "", h, esc(m))
+                   for i, (m, h) in enumerate(d["bars"]))
+    screens["tableau"] = (
+        head(d["title"], d["new"]) +
+        '<div class="mock-stats">%s</div><div class="mock-chart"><span>%s</span><ul class="mock-bars" aria-hidden="true">%s</ul></div>'
+        % (kp, esc(d["chart"]), bars))
+    # Suivi des clients et des chantiers
+    cl = t["clients"]
+    doc_icon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1.5h5l3.5 3.5v9.5h-8.5z M9 1.5V5h3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>'
+    docs = "".join('<li>%s<span>%s</span><small>%s</small></li>' % (doc_icon, esc(n), esc(dt)) for n, dt in cl["docs"])
+    screens["clients"] = (
+        head(cl["title"], cl["new"]) +
+        '<div class="mock-client"><b>%s</b><span>%s</span><span>%s</span></div>'
+        '<div class="mock-site"><div class="mock-site-top"><b>%s</b><span class="mock-badge">%d %%</span></div><span>%s</span>'
+        '<div class="mock-progress" aria-hidden="true"><i style="--p:%d%%"></i></div></div>'
+        '<p class="mock-label">%s</p><ul class="mock-docs">%s</ul>'
+        % (esc(cl["name"]), esc(cl["address"]), esc(cl["contact"]), esc(cl["site"]), cl["progress"], esc(cl["step"]), cl["progress"],
+           esc(cl["docs_title"]), docs))
+    # Gestion RH
+    rh = t["rh"]
+    reqs = "".join('<tr><td>%s</td><td>%s</td><td><span class="chip %s">%s</span></td></tr>'
+                   % (esc(a), esc(b), "acc" if st == "ok" else "wait", esc(rh["status"][st])) for a, b, st in rh["requests"])
+    screens["rh"] = (
+        head(rh["title"], rh["new"]) +
+        '<div class="mock-kpi mock-counter"><span>%s</span><b>%s <small>%s</small></b></div>'
+        '<table class="mock-table mock-req"><tbody>%s</tbody></table>'
+        '<ul class="mock-tags">%s</ul>'
+        % (esc(rh["counter"]), esc(rh["counter_value"]), esc(rh["counter_unit"]), reqs,
+           "".join("<li>%s</li>" % esc(x) for x in rh["docs"])))
+    # Autre chose
+    au = t["autre"]
+    screens["autre"] = (
+        head(au["title"]) +
+        '<div class="mock-empty"><span class="mock-plus" aria-hidden="true">+</span><b>%s</b><span>%s</span>'
+        '<a class="btn btn-primary" href="#contact">%s</a></div>'
+        % (esc(au["text"]), esc(au["sub"]), esc(t["cta"])))
+
+    panes = "".join('<div class="mock-screen" id="ecran-%s" data-screen="%s"%s>%s</div>'
+                    % (k, k, "" if k == first else " hidden", screens[k]) for k in keys)
     mock = (
-        '<figure class="mock reveal" aria-label="%s">'
+        '<figure class="mock reveal" id="outils-maquette" data-tool="%s" aria-label="%s">'
         '<div class="mock-win"><div class="mock-top"><span class="term-lights" aria-hidden="true"><i></i><i></i><i></i></span><span>outil.votre-entreprise.ch</span></div>'
-        '<div class="mock-app"><ul class="mock-nav">%s</ul><div class="mock-main">'
-        '<div class="mock-head"><h4>%s</h4><span class="mock-btn">+ %s</span></div>'
-        '<div class="mock-kpi"><span>%s</span><b>%s</b><i class="mock-spark" aria-hidden="true"></i></div>'
-        '<table class="mock-table"><tbody>%s</tbody></table></div></div></div>'
+        '<div class="mock-app"><ul class="mock-nav">%s</ul><div class="mock-main">%s</div></div></div>'
         '<figcaption>%s</figcaption></figure>'
-        % (esc(t["mock_note"]), nav, esc(t["mock_title"]), esc(t["mock_new"]), esc(t["mock_total"]), esc(t["mock_total_value"]), rows, esc(t["mock_note"])))
+        % (first, esc(t["mock_note"]), nav, panes, esc(t["mock_note"])))
     H.append(
         '<section class="section tools-sec" id="outils" aria-labelledby="outils-title"><div class="container">'
         '<div class="tools-grid"><div><div class="reveal">%s<h2 id="outils-title">%s</h2><p class="lede">%s</p></div>'

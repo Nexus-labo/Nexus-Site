@@ -135,8 +135,10 @@ tools = {
     "proof": "On utilise déjà un outil de ce genre chez Lugon Assèchement : factures avec QR-facture, devis, suivi des paiements et documents classés par client.",
     "price": "Prix sur devis, selon l’outil.",
     "cta": "Décrire mon besoin",
+    # Une clé par exemple ci-dessus, dans le même ordre : couleur (style.css) et écran de la maquette
+    "keys": ["factures", "planning", "tableau", "clients", "rh", "autre"],
+    "mock_nav": ["Factures", "Planning", "Tableau de bord", "Clients", "RH", "Autre"],
     "mock_title": "Factures",
-    "mock_nav": ["Tableau de bord", "Factures", "Devis", "Clients", "Documents"],
     "mock_rows": [
         ("F-2026-041", "Boulangerie du Bourg", "CHF 480.00", "paid"),
         ("F-2026-042", "Garage des Alpes", "CHF 1’250.00", "wait"),
@@ -148,6 +150,50 @@ tools = {
     "mock_total": "Encaissé ce mois",
     "mock_total_value": "CHF 2’620",
     "mock_note": "Exemple d’interface, données fictives.",
+    "planning": {
+        "title": "Semaine 42", "new": "Créneau",
+        "days": ["Lu", "Ma", "Me", "Je", "Ve"],
+        # None = libre ; True en 3e élément = remplacement, le créneau couvre alors deux jours
+        "rows": [
+            ("Sandra", [("7–12", "a"), ("7–12", "a"), None, ("13–18", "b"), ("7–12", "a")]),
+            ("Luca", [("13–18", "b"), None, ("7–12", "a", True), ("13–18", "b")]),
+            ("Noémie", [("7–16", "c"), ("7–16", "c"), ("7–16", "c"), None, ("7–16", "c")]),
+            ("Yannick", [None, ("13–18", "b"), ("13–18", "b"), ("13–18", "b"), None]),
+        ],
+        "swap": "Remplacement",
+    },
+    "tableau": {
+        "title": "Octobre 2026", "new": "Exporter",
+        "kpis": [("Ventes du mois", "CHF 18’450", "+12 %"), ("Nouveaux clients", "7", "+2"), ("Rendez-vous", "23", "+4")],
+        "chart": "Ventes sur 6 mois",
+        "bars": [("Mai", 62), ("Juin", 70), ("Juil.", 55), ("Août", 48), ("Sept.", 81), ("Oct.", 92)],
+    },
+    "clients": {
+        "title": "Fiche client", "new": "Document",
+        "name": "Menuiserie Fellay SA",
+        "address": "Rue du Simplon 14, 1920 Martigny",
+        "contact": "Marc Fellay · 027 722 14 60",
+        "site": "Rénovation atelier",
+        "step": "Étape 3 sur 4 : finitions",
+        "progress": 68,
+        "docs_title": "Documents",
+        "docs": [("Devis D-2026-018.pdf", "12 sept."), ("Plans_atelier_v2.pdf", "20 sept."), ("Photos_chantier.zip", "3 oct.")],
+    },
+    "rh": {
+        "title": "Absences", "new": "Demande",
+        "counter": "Vacances restantes", "counter_value": "14", "counter_unit": "jours sur 25",
+        "requests": [
+            ("Sandra Bonvin", "Vacances, 20–24 oct.", "ok"),
+            ("Luca Rey", "Formation, 3 nov.", "wait"),
+            ("Noémie Carron", "Vacances, 22 déc.–2 janv.", "wait"),
+        ],
+        "status": {"ok": "Validée", "wait": "En attente"},
+        "docs": ["Contrat", "Certificat de salaire", "Attestation AVS"],
+    },
+    "autre": {
+        "title": "Votre outil", "text": "Votre outil ici",
+        "sub": "Un besoin qui n’entre dans aucune case? On le construit avec vous.",
+    },
 }
 
 method = {
