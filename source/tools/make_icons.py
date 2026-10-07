@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.normpath(os.path.join(HERE, "..", "..", "site"))
 FONT = os.path.join(HERE, "manrope-var.ttf")
+SYMBOLE = os.path.join(HERE, "nexus-symbole.png")  # logo officiel, fond transparent
 
 NAVY = (20, 33, 61)
 CREAM = (246, 242, 236)
@@ -26,6 +27,16 @@ def mark(size, bg, dot, link, scale=4):
     d.ellipse([ax - r, cy - r, ax + r, cy + r], fill=dot + (255,))
     d.ellipse([bx - r, cy - r, bx + r, cy + r], fill=CORAL + (255,))
     return im.resize((size, size), Image.LANCZOS)
+
+
+def symbole(size, bg=None):
+    """Le logo officiel (nexus-symbole.png), sur fond transparent ou sur la couleur bg."""
+    im = Image.open(SYMBOLE).convert("RGBA").resize((size, size), Image.LANCZOS)
+    if bg is None:
+        return im
+    out = Image.new("RGBA", (size, size), bg + (255,))
+    out.alpha_composite(im)
+    return out
 
 
 def swiss_cross(d, cx, cy, span, fill=(255, 255, 255, 255)):
@@ -88,13 +99,11 @@ def og_image():
 
 def main():
     os.makedirs(os.path.join(SITE, "assets", "img"), exist_ok=True)
-    big = mark(512, CREAM, NAVY, NAVY)
-    big.save(os.path.join(SITE, "favicon-512x512.png"), optimize=True)
-    mark(180, CREAM, NAVY, NAVY).save(os.path.join(SITE, "apple-touch-icon.png"), optimize=True)
-    small = mark(32, CREAM, NAVY, NAVY)
-    small.save(os.path.join(SITE, "favicon-32x32.png"), optimize=True)
-    ico = mark(64, CREAM, NAVY, NAVY)
-    ico.save(os.path.join(SITE, "favicon.ico"), format="ICO", sizes=[(16, 16), (32, 32), (48, 48)])
+    symbole(512).save(os.path.join(SITE, "favicon-512x512.png"), optimize=True)
+    # iOS remplit la transparence en noir : fond crème pour l'icône d'écran d'accueil
+    symbole(180, CREAM).save(os.path.join(SITE, "apple-touch-icon.png"), optimize=True)
+    symbole(32).save(os.path.join(SITE, "favicon-32x32.png"), optimize=True)
+    symbole(64).save(os.path.join(SITE, "favicon.ico"), format="ICO", sizes=[(16, 16), (32, 32), (48, 48)])
     og_image()
     for name in ("favicon-512x512.png", "apple-touch-icon.png", "favicon-32x32.png", "favicon.ico"):
         print("écrit", name, os.path.getsize(os.path.join(SITE, name)), "octets")
