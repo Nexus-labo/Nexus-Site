@@ -68,6 +68,7 @@
     for (var bi = 0; bi < BUCKETS; bi++) { segNavy.push([]); segCoral.push([]); }
 
     /* halo corail pré-dessiné */
+    var dust = [];
     var glow = document.createElement("canvas"); glow.width = glow.height = 64;
     (function () {
       var g = glow.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -102,6 +103,16 @@
       for (var i = 0; i < nodes.length; i++) { nodes[i].x *= BX / oldBX; nodes[i].y *= BY / oldBY; }
       while (nodes.length < count) { nodes.push(spawn()); }
       nodes.length = count; proj.length = count; order.length = 0;
+      /* poussières corail : décor flottant derrière le réseau, jamais reliées (demande de Patrick, 07.10) */
+      var dn = finePointer ? 60 : 34;
+      while (dust.length < dn) {
+        /* tailles variées : beaucoup de poussière fine, quelques points plus francs (loi en puissance) */
+        var rr = 0.6 + 3.4 * Math.pow(Math.random(), 2.2);
+        dust.push({ x: Math.random() * W, y: Math.random() * H, r: rr,
+                    vx: (Math.random() - 0.5) * 0.08, vy: -(0.02 + Math.random() * 0.06) * (0.6 + rr / 4),
+                    a: 0.3 + Math.random() * 0.35, t: Math.random() * 6.28, s: 0.4 + Math.random() * 0.8 });
+      }
+      dust.length = dn;
     };
 
     var project = function () {
@@ -120,6 +131,14 @@
 
     var draw = function (time) {
       ctx.clearRect(0, 0, W, H);
+      /* poussières : tout au fond, légère respiration, parallaxe très faible */
+      for (var di = 0; di < dust.length; di++) {
+        var du = dust[di], tw = 0.7 + 0.3 * Math.sin(time / 1400 * du.s + du.t);
+        var dx0 = du.x + mouse.x * 6 * du.r, dy0 = du.y + mouse.y * 4 * du.r;
+        if (du.r > 1.8) { ctx.globalAlpha = du.a * tw * 0.6; ctx.drawImage(glow, dx0 - du.r * 4, dy0 - du.r * 4, du.r * 8, du.r * 8); ctx.globalAlpha = 1; }
+        ctx.fillStyle = "rgba(" + CORAL + "," + (du.a * tw).toFixed(3) + ")";
+        ctx.beginPath(); ctx.arc(dx0, dy0, du.r, 0, 6.2832); ctx.fill();
+      }
       var i, j, a, b, pa, pb, dx, dy, dz, d2, k, depth, lvl, list;
       for (i = 0; i < BUCKETS; i++) { segNavy[i].length = 0; segCoral[i].length = 0; }
       for (i = 0; i < nodes.length; i++) { if (adj[i]) { adj[i].length = 0; } else { adj[i] = []; } }
@@ -270,6 +289,12 @@
       if (time - lastDraw < 15) { return; }                /* 60 images par seconde au maximum */
       lastDraw = time;
       var dt = last ? Math.min(48, time - last) : 16; last = time;
+      for (var k2 = 0; k2 < dust.length; k2++) {
+        var d2u = dust[k2];
+        d2u.x += d2u.vx * dt / 16; d2u.y += d2u.vy * dt / 16;
+        if (d2u.y < -6) { d2u.y = H + 6; d2u.x = Math.random() * W; }
+        if (d2u.x < -6) { d2u.x = W + 6; } else if (d2u.x > W + 6) { d2u.x = -6; }
+      }
       var f = dt / 16.67;
       for (var i = 0; i < nodes.length; i++) {
         var n = nodes[i];
