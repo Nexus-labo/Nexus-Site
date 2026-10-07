@@ -104,11 +104,13 @@
       while (nodes.length < count) { nodes.push(spawn()); }
       nodes.length = count; proj.length = count; order.length = 0;
       /* poussières corail : décor flottant derrière le réseau, jamais reliées (demande de Patrick, 07.10) */
-      var dn = finePointer ? 60 : 34;
+      var dn = finePointer ? 78 : 40;
       while (dust.length < dn) {
         /* tailles variées : beaucoup de poussière fine, quelques points plus francs (loi en puissance) */
         var rr = 0.6 + 3.4 * Math.pow(Math.random(), 2.2);
-        dust.push({ x: Math.random() * W, y: Math.random() * H, r: rr,
+        /* les fines partout (un peu plus à gauche, sous le titre), les grosses à droite dans la lumière */
+        var px = rr > 1.8 ? 0.45 + Math.random() * 0.55 : Math.pow(Math.random(), 1.25);
+        dust.push({ x: px * W, y: Math.random() * H, r: rr,
                     vx: (Math.random() - 0.5) * 0.08, vy: -(0.02 + Math.random() * 0.06) * (0.6 + rr / 4),
                     a: 0.3 + Math.random() * 0.35, t: Math.random() * 6.28, s: 0.4 + Math.random() * 0.8 });
       }
@@ -292,7 +294,7 @@
       for (var k2 = 0; k2 < dust.length; k2++) {
         var d2u = dust[k2];
         d2u.x += d2u.vx * dt / 16; d2u.y += d2u.vy * dt / 16;
-        if (d2u.y < -6) { d2u.y = H + 6; d2u.x = Math.random() * W; }
+        if (d2u.y < -6) { d2u.y = H + 6; d2u.x = (d2u.r > 1.8 ? 0.45 + Math.random() * 0.55 : Math.pow(Math.random(), 1.25)) * W; }
         if (d2u.x < -6) { d2u.x = W + 6; } else if (d2u.x > W + 6) { d2u.x = -6; }
       }
       var f = dt / 16.67;
