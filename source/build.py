@@ -198,17 +198,55 @@ def alps_hero():
     ) % (W, H, far_peaks, mid_peaks, flat_cervin(1230, 470, 1.0, cerv), near, front)
 
 
+# Pied de page : l'ancienne chaîne en crêtes (bruit en sommets pointus), gardée à la demande de Patrick (07.10).
+def _ridge(width, base, amp, seed, freqs=(0.004, 0.009, 0.021, 0.047), step=8, peak=None):
+    rnd = random.Random(seed)
+    phases = [rnd.uniform(0, 6.283) for _ in freqs]
+    weights = [1.0, 0.55, 0.28, 0.12]
+    pts = []
+    for x in range(0, width + step, step):
+        h = 0.0
+        for f, ph, w in zip(freqs, phases, weights):
+            h += w * (1 - abs(math.sin(x * f + ph))) ** 1.6
+        h = h / sum(weights)
+        y = base - amp * h + rnd.uniform(-1.6, 1.6)
+        if peak:
+            y = min(y, peak(x))
+        pts.append((x, round(y, 1)))
+    return pts
+
+
+def _cervin(cx, top, half):
+    """Profil inspiré du Cervin : arête gauche longue et concave, sommet au nez légèrement penché,
+    face droite plus raide. Points relatifs (dx, dy) en unités de « half », interpolés en x."""
+    prof = [(-5.0, 4.2), (-2.2, 1.9), (-1.5, 1.35), (-1.0, 0.95), (-0.62, 0.62), (-0.36, 0.36), (-0.2, 0.17),
+            (-0.1, 0.05), (-0.03, 0.0), (0.04, 0.02), (0.08, 0.07), (0.12, 0.06), (0.2, 0.22),
+            (0.34, 0.5), (0.52, 0.86), (0.78, 1.25), (1.2, 1.7), (1.8, 2.1), (4.0, 3.6)]
+    pts = [(cx + dx * half, top + dy * half) for dx, dy in prof]
+
+    def f(x):
+        if x <= pts[0][0] or x >= pts[-1][0]:
+            return 10 ** 6
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            if x0 <= x <= x1:
+                return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+        return 10 ** 6
+    return f
+
+
+def _path(pts, width, height):
+    d = "M0 %d " % height + " ".join("L%s %s" % (x, y) for x, y in pts) + " L%d %d Z" % (width, height)
+    return d
+
+
 def alps_footer():
     W, H = 1600, 110
-    tri = lambda x, t, wl, wr: '<path d="%s"/>' % _poly([(x - wl, H), (x, t), (x + wr, H)])
-    back = "".join(tri(*p) for p in [(90, 40, 140, 130), (420, 30, 170, 150), (760, 46, 150, 140),
-                                       (1060, 34, 160, 170), (1380, 42, 150, 160), (1600, 50, 120, 120)])
-    front = "".join(tri(*p) for p in [(180, 62, 160, 150), (320, 18, 90, 70), (560, 64, 170, 160),
-                                        (900, 58, 180, 170), (1240, 66, 170, 160), (1520, 60, 150, 140)])
+    back = _ridge(W, 96, 70, 23)
+    front = _ridge(W, 110, 52, 29, peak=_cervin(320, 30, 40))
     return (
         '<svg class="footer-alps" viewBox="0 0 %d %d" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
-        '<g fill="#1D1D1F" opacity="0.45">%s</g><g fill="#1D1D1F">%s<path d="M0 %d L0 104 L%d 104 L%d %d Z"/></g></svg>'
-    ) % (W, H, back, front, H, W, W, H)
+        '<path d="%s" fill="#1D1D1F" fill-opacity="0.45"/><path d="%s" fill="#1D1D1F"/></svg>'
+    ) % (W, H, _path(back, W, H), _path(front, W, H))
 
 
 def alps_night():
