@@ -171,9 +171,9 @@ def hill_y(width, base, crests, x):
 
 def alps_hero():
     W, H = 1600, 520
-    far = (("#E2E2E6", "#D5D5DA", "#FFFFFF", "#EDEDF1", 0.95))
-    mid = (("#C9C9CE", "#B4B4BA", "#FFFFFF", "#E6E6EB", 0.97))
-    cerv = (("#B9B9BF", "#9E9EA5", "#FFFFFF", "#E4E4E9", 0.97))
+    far = (("#E6E3E6", "#D5D5DA", "#FFFCF9", "#EDEDF1", 0.95))
+    mid = (("#CFCBCD", "#B4B4BA", "#FFFBF7", "#E6E6EB", 0.97))
+    cerv = (("#C0BBBD", "#9E9EA5", "#FFFBF6", "#E4E4E9", 0.97))
     far_peaks = "".join(flat_peak(*p, col=far, seed=i) for i, p in enumerate([
         (60, 300, 240, 220, 470), (390, 262, 260, 250, 470), (720, 300, 230, 210, 470),
         (990, 270, 240, 260, 470), (1440, 250, 250, 240, 470), (1600, 300, 200, 200, 470)]))
@@ -185,7 +185,11 @@ def alps_hero():
     return (
         '<svg class="hero-alps" viewBox="0 0 %d %d" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">'
         '<defs><linearGradient id="alps-g3" x1="0" y1="0" x2="0" y2="1">'
-        '<stop offset="0" stop-color="#DEDCD8"/><stop offset="1" stop-color="#F3F1EE"/></linearGradient></defs>'
+        '<stop offset="0" stop-color="#DEDCD8"/><stop offset="1" stop-color="#F3F1EE"/></linearGradient>'
+        '<radialGradient id="sun-halo"><stop offset="0" stop-color="#FFE3D6" stop-opacity="0.9"/>'
+        '<stop offset="0.45" stop-color="#FFC9B8" stop-opacity="0.35"/><stop offset="1" stop-color="#FFC9B8" stop-opacity="0"/></radialGradient></defs>'
+        '<g class="sun" data-depth="0.15"><circle cx="935" cy="300" r="170" fill="url(#sun-halo)"/>'
+        '<circle cx="935" cy="300" r="58" fill="#FFFBF4" fill-opacity="0.95"/></g>'
         '<g class="alps-layer" data-depth="0.25">%s</g>'
         '<g class="alps-layer" data-depth="0.5">%s%s</g>'
         '<g class="alps-layer" data-depth="0.8">%s</g>'
