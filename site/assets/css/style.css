@@ -252,7 +252,7 @@ main { padding-top: var(--header-h); }
 .hero-veil {
   position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 55% 65% at 24% 48%, rgba(250, 249, 247, 0.94) 0%, rgba(250, 249, 247, 0.6) 45%, rgba(250, 249, 247, 0) 75%),
+    radial-gradient(ellipse 55% 65% at 24% 48%, rgba(250, 249, 247, 0.78) 0%, rgba(250, 249, 247, 0.42) 45%, rgba(250, 249, 247, 0) 75%),
     radial-gradient(circle 360px at 62% 66%, rgba(255, 95, 87, 0.1) 0%, rgba(255, 95, 87, 0) 70%),
     linear-gradient(180deg, rgba(250, 249, 247, 0) 70%, rgba(250, 249, 247, 0.9) 100%);
 }
