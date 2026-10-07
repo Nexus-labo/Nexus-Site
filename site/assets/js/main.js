@@ -667,8 +667,24 @@
       toolBtns.forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.tool === key ? "true" : "false"); });
       screens.forEach(function (s) { s.hidden = s.dataset.screen !== key; });
     };
+    /* Sur ordinateur, la maquette suit le défilement : chaque exemple qui passe la moitié de l'écran
+       affiche son écran (idée de Patrick, 07.10). Un clic reprend la main jusqu'au prochain vrai défilement. */
+    var tools = Array.prototype.slice.call(document.querySelectorAll(".tools-list .tool[data-tool]"));
+    var clickY = -1e9;
+    var followScroll = function () {
+      if (narrow.matches || Math.abs(window.scrollY - clickY) < 160) { return; }
+      var line = window.innerHeight * 0.5, key = null;
+      for (var i = 0; i < tools.length; i++) {
+        var r = tools[i].getBoundingClientRect();
+        if (r.top <= line) { key = tools[i].dataset.tool; } else { break; }
+      }
+      if (key) { showTool(key); }
+    };
+    var sraf2 = 0;
+    window.addEventListener("scroll", function () { if (!sraf2) { sraf2 = requestAnimationFrame(function () { sraf2 = 0; followScroll(); }); } }, { passive: true });
     toolBtns.forEach(function (b) {
       b.addEventListener("click", function () {
+        clickY = window.scrollY;
         showTool(b.dataset.tool);
         // Sur mobile, la maquette est sous la liste : on la fait venir à l'écran
         if (narrow.matches && b.classList.contains("tool-btn")) {
