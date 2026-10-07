@@ -307,6 +307,20 @@
         resize(); project(); draw(performance.now());
       }, 150);
     });
+    /* la taille réelle de l'accueil peut changer après le premier affichage (police chargée, texte qui passe
+       sur une ligne de plus sur téléphone) : sans ce suivi, le dessin restait étiré jusqu'au prochain redimensionnement */
+    if ("ResizeObserver" in window) {
+      var roT = 0;
+      new ResizeObserver(function () {
+        cancelAnimationFrame(roT);
+        roT = requestAnimationFrame(function () {
+          var r = canvas.getBoundingClientRect();
+          if (Math.abs(r.width - W) < 1 && Math.abs(r.height - H) < 1) { return; }
+          lastW = r.width; lastH = r.height;
+          resize(); project(); draw(performance.now());
+        });
+      }).observe(canvas);
+    }
     var hero = canvas.parentNode;
     /* toucher (ou cliquer) dans l'accueil : une onde part du doigt, sans gêner le défilement */
     hero.addEventListener("pointerdown", function (e) {
@@ -622,6 +636,17 @@
     var skyStart = function () { if (!son && !reduced && !document.hidden) { son = true; nextShoot = performance.now() + 2500; sraf = requestAnimationFrame(skyLoop); } };
     var skyStop = function () { son = false; cancelAnimationFrame(sraf); };
     sizeSky(); drawSky(0);
+    if ("ResizeObserver" in window) {
+      var skyR = 0;
+      new ResizeObserver(function () {
+        cancelAnimationFrame(skyR);
+        skyR = requestAnimationFrame(function () {
+          var r = sky.getBoundingClientRect();
+          if (Math.abs(r.width - SW) < 1 && Math.abs(r.height - SH) < 40) { return; }
+          sizeSky(); drawSky(performance.now());
+        });
+      }).observe(sky);
+    }
     var skyT = 0, skyW = SW;
     window.addEventListener("resize", function () {
       clearTimeout(skyT);
