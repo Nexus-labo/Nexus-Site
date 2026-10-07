@@ -53,25 +53,25 @@ LOGO_SVG = (
 )
 
 HERO_ART = """<svg viewBox="0 0 520 440" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g stroke="#14213D" stroke-width="2" stroke-linecap="round" opacity="0.28">
+  <g stroke="#1D1D1F" stroke-width="2" stroke-linecap="round" opacity="0.28">
     <path d="M78 128 L206 68"/><path d="M206 68 L326 156"/><path d="M326 156 L462 96"/>
     <path d="M78 128 L152 300"/><path d="M152 300 L298 328"/><path d="M298 328 L326 156"/>
     <path d="M326 156 L430 262"/><path d="M430 262 L462 96"/><path d="M430 262 L392 388"/><path d="M298 328 L392 388"/>
   </g>
   <g class="float">
-    <circle cx="78" cy="128" r="11" fill="#14213D"/>
-    <circle cx="206" cy="68" r="8" fill="#14213D" opacity="0.7"/>
-    <circle cx="462" cy="96" r="7" fill="#14213D" opacity="0.5"/>
-    <circle cx="152" cy="300" r="9" fill="#14213D" opacity="0.8"/>
+    <circle cx="78" cy="128" r="11" fill="#1D1D1F"/>
+    <circle cx="206" cy="68" r="8" fill="#1D1D1F" opacity="0.7"/>
+    <circle cx="462" cy="96" r="7" fill="#1D1D1F" opacity="0.5"/>
+    <circle cx="152" cy="300" r="9" fill="#1D1D1F" opacity="0.8"/>
   </g>
   <g class="float delay">
-    <circle cx="298" cy="328" r="7" fill="#14213D" opacity="0.6"/>
-    <circle cx="430" cy="262" r="12" fill="#14213D"/>
-    <circle cx="392" cy="388" r="6" fill="#14213D" opacity="0.5"/>
+    <circle cx="298" cy="328" r="7" fill="#1D1D1F" opacity="0.6"/>
+    <circle cx="430" cy="262" r="12" fill="#1D1D1F"/>
+    <circle cx="392" cy="388" r="6" fill="#1D1D1F" opacity="0.5"/>
   </g>
   <g class="float">
-    <circle cx="326" cy="156" r="34" fill="#FF6B57" opacity="0.14"/>
-    <circle cx="326" cy="156" r="16" fill="#FF6B57"/>
+    <circle cx="326" cy="156" r="34" fill="#FF5F57" opacity="0.14"/>
+    <circle cx="326" cy="156" r="16" fill="#FF5F57"/>
   </g>
 </svg>"""
 
@@ -185,13 +185,13 @@ def matterhorn(cx, base_y, scale, night=False):
               [(-92, 168), (-26, 154)], [(-236, 360), (-20, 336)]]
     glacier = [(150, 380), (178, 336), (214, 318), (252, 322), (282, 344), (306, 380)]
     if night:
-        body, rock_shadow, snow_c, snow_o, line_c, rim_o = "#1A2950", "#0B1430", "#DCE4F5", 0.55, "#0B1430", 0.4
+        body, rock_shadow, snow_c, snow_o, line_c, rim_o = "#232326", "#161618", "#E5E5EA", 0.55, "#161618", 0.4
     else:
-        body, rock_shadow, snow_c, snow_o, line_c, rim_o = "url(#mh-body)", "#14213D", "#FFFFFF", 0.95, "#14213D", 0.75
+        body, rock_shadow, snow_c, snow_o, line_c, rim_o = "url(#mh-body)", "#1D1D1F", "#FFFFFF", 0.95, "#1D1D1F", 0.75
     out = []
     if not night:
         out.append('<defs><linearGradient id="mh-body" x1="0" y1="0" x2="0" y2="1">'
-                   '<stop offset="0" stop-color="#AEB5C3"/><stop offset="1" stop-color="#E6E2DC"/></linearGradient></defs>')
+                   '<stop offset="0" stop-color="#B3B3B8"/><stop offset="1" stop-color="#E6E2DC"/></linearGradient></defs>')
     out.append('<path d="%s" fill="%s"/>' % (poly(outline), body))
     out += ['<path d="M%s" fill="none" stroke="%s" stroke-opacity="0.09" stroke-width="%.1f" stroke-linecap="round"/>'
             % (T(l), line_c, 1.6 * scale) for l in strata]
@@ -226,10 +226,10 @@ def alps_hero():
         '%s</g>'
         '<g class="alps-layer" data-depth="0.8"><path d="%s" fill="url(#alps-g3)"/>'
         '<path d="%s" fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="1.1"/></g>'
-        '<g class="alps-layer" data-depth="1.1"><path d="%s" fill="#F6F2EC"/></g>'
+        '<g class="alps-layer" data-depth="1.1"><path d="%s" fill="#FAF9F7"/></g>'
         '</svg>'
     ) % (W, H,
-         grad(1, "#D9D7D6", "#EEEAE4"), grad(2, "#B9BFCB", "#E9E5DF"), grad(3, "#98A1B3", "#E3DFD9"),
+         grad(1, "#D9D7D6", "#EEEAE4"), grad(2, "#BEBEC3", "#E9E5DF"), grad(3, "#A0A0A6", "#E3DFD9"),
          _path(far, W, H), _snow(far, 186, 31),
          _path(mid, W, H), _snow(mid, 128, 37), _rim(mid), matterhorn(1230, 470, 1.0),
          _path(near, W, H), _rim(near),
@@ -242,7 +242,7 @@ def alps_footer():
     front = _ridge(W, 110, 52, 29, peak=_cervin(320, 30, 40))
     return (
         '<svg class="footer-alps" viewBox="0 0 %d %d" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
-        '<path d="%s" fill="#14213D" fill-opacity="0.45"/><path d="%s" fill="#14213D"/></svg>'
+        '<path d="%s" fill="#1D1D1F" fill-opacity="0.45"/><path d="%s" fill="#1D1D1F"/></svg>'
     ) % (W, H, _path(back, W, H), _path(front, W, H))
 
 
@@ -268,13 +268,13 @@ def alps_night():
         '<svg class="night-alps" viewBox="0 0 %d %d" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">'
         '<defs><radialGradient id="glow-v"><stop offset="0" stop-color="#FFB37A" stop-opacity="0.55"/>'
         '<stop offset="1" stop-color="#FFB37A" stop-opacity="0"/></radialGradient></defs>'
-        '<path d="%s" fill="#24365F"/><path d="%s" fill="#DCE4F5" fill-opacity="0.16"/>'
-        '<path d="%s" fill="none" stroke="#C9D1E0" stroke-opacity="0.22" stroke-width="1"/>'
-        '<path d="%s" fill="#1A2950"/><path d="%s" fill="#DCE4F5" fill-opacity="0.22"/>'
-        '<path d="%s" fill="none" stroke="#C9D1E0" stroke-opacity="0.38" stroke-width="1.2"/>'
+        '<path d="%s" fill="#2E2E32"/><path d="%s" fill="#E5E5EA" fill-opacity="0.16"/>'
+        '<path d="%s" fill="none" stroke="#C7C7CC" stroke-opacity="0.22" stroke-width="1"/>'
+        '<path d="%s" fill="#232326"/><path d="%s" fill="#E5E5EA" fill-opacity="0.22"/>'
+        '<path d="%s" fill="none" stroke="#C7C7CC" stroke-opacity="0.38" stroke-width="1.2"/>'
         '%s'
-        '<path d="%s" fill="#121F3F"/>'
-        '<path d="%s" fill="#0D1730"/>'
+        '<path d="%s" fill="#1A1A1D"/>'
+        '<path d="%s" fill="#111113"/>'
         '<g class="villages">%s</g>'
         '</svg>'
     ) % (W, H,
@@ -812,7 +812,7 @@ def build_sitemap(langs):
     write("site.webmanifest", json.dumps({
         "name": "NexusLab", "short_name": "NexusLab",
         "icons": [{"src": "/favicon-512x512.png", "sizes": "512x512", "type": "image/png"}],
-        "theme_color": "#F6F2EC", "background_color": "#F6F2EC", "display": "browser",
+        "theme_color": "#FAF9F7", "background_color": "#FAF9F7", "display": "browser",
     }, indent=2) + "\n")
     write("_headers",
           "/*\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: strict-origin-when-cross-origin\n"
