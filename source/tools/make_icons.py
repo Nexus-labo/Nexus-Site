@@ -9,10 +9,10 @@ SITE = os.path.normpath(os.path.join(HERE, "..", "..", "site"))
 FONT = os.path.join(HERE, "manrope-var.ttf")
 SYMBOLE = os.path.join(HERE, "nexus-symbole.png")  # logo officiel, fond transparent
 
-NAVY = (20, 33, 61)
-CREAM = (246, 242, 236)
-CORAL = (255, 107, 87)
-NAVY2 = (201, 209, 224)
+NAVY = (29, 29, 31)
+CREAM = (250, 249, 247)
+CORAL = (255, 95, 87)
+NAVY2 = (199, 199, 204)
 
 
 def mark(size, bg, dot, link, scale=4):
@@ -88,7 +88,7 @@ def og_image():
     # Motif de points à droite
     pts = [(1000, 110), (1120, 190), (1050, 310), (1140, 430), (985, 520)]
     for a, b in [(0, 1), (1, 2), (2, 3), (2, 4), (0, 2)]:
-        d.line([pts[a], pts[b]], fill=(60, 76, 110), width=3)
+        d.line([pts[a], pts[b]], fill=(72, 72, 76), width=3)
     for i, (px, py) in enumerate(pts):
         rr = 22 if i == 2 else 11
         d.ellipse([px - rr, py - rr, px + rr, py + rr], fill=CORAL if i == 2 else NAVY2)
