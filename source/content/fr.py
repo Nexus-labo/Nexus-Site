@@ -239,6 +239,8 @@ work = {
         "intro": "C’est l’entreprise familiale de Patrick, et notre premier terrain d’essai.",
         "url": "https://lugon-assechement.ch",
         "url_label": "lugon-assechement.ch",
+        "shot_cta": "Voir le site",
+        "shot_label": "Ouvrir le site de Lugon Assèchement dans un nouvel onglet",
         "image": "lugon-site",
         "image_alt": "Page d’accueil du site de Lugon Assèchement, avec son titre et son bouton d’appel d’urgence",
         "blocks": [
