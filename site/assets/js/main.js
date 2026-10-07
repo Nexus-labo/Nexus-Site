@@ -699,11 +699,22 @@
     var tools = Array.prototype.slice.call(document.querySelectorAll(".tools-list .tool[data-tool]"));
     var clickY = -1e9;
     var followScroll = function () {
-      if (narrow.matches || Math.abs(window.scrollY - clickY) < 160) { return; }
-      var line = window.innerHeight * 0.5, key = null;
-      for (var i = 0; i < tools.length; i++) {
-        var r = tools[i].getBoundingClientRect();
-        if (r.top <= line) { key = tools[i].dataset.tool; } else { break; }
+      if (Math.abs(window.scrollY - clickY) < 160) { return; }
+      /* ordinateur : l'exemple qui passe le milieu de l'écran ; téléphone : celui qui passe sous la maquette collée */
+      var key = null, i, r;
+      if (narrow.matches) {
+        /* le premier exemple visible juste sous la maquette collée */
+        var under = mock.getBoundingClientRect().bottom + 8;
+        for (i = 0; i < tools.length; i++) {
+          r = tools[i].getBoundingClientRect();
+          if (r.bottom > under) { key = tools[i].dataset.tool; break; }
+        }
+      } else {
+        var line = window.innerHeight * 0.5;
+        for (i = 0; i < tools.length; i++) {
+          r = tools[i].getBoundingClientRect();
+          if (r.top <= line) { key = tools[i].dataset.tool; } else { break; }
+        }
       }
       if (key) { showTool(key); }
     };
@@ -713,10 +724,6 @@
       b.addEventListener("click", function () {
         clickY = window.scrollY;
         showTool(b.dataset.tool);
-        // Sur mobile, la maquette est sous la liste : on la fait venir à l'écran
-        if (narrow.matches && b.classList.contains("tool-btn")) {
-          mock.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
-        }
       });
     });
   }
