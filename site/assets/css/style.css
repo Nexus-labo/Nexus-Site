@@ -802,7 +802,8 @@ a.case-shot:hover .shot-cta, a.case-shot:focus-visible .shot-cta { background: v
 
 /* ---------- Outils sur mesure ---------- */
 .tools-sec { background: linear-gradient(180deg, var(--cream) 0%, #F1EFEB 100%); }
-.tools-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
+.tools-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); grid-template-areas: "intro mock" "body mock"; gap: 0 clamp(32px, 5vw, 72px); align-items: start; }
+.tools-intro { grid-area: intro; } .tools-body { grid-area: body; } .mock { grid-area: mock; }
 .tools-grid h2 { max-width: 13ch; }
 .tools-grid .lede { margin-top: 20px; }
 .tools-list { list-style: none; margin-top: 32px; display: grid; grid-template-columns: 1fr; gap: 4px 16px; }
@@ -830,8 +831,13 @@ a.case-shot:hover .shot-cta, a.case-shot:focus-visible .shot-cta { background: v
 .tools-proof { margin-top: 24px; padding: 16px 18px; border-radius: var(--radius-s); background: rgba(255, 255, 255, 0.7); border: 1px solid var(--line); color: var(--ink-2); font-size: 0.9375rem; }
 .tools-cta { margin-top: 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
 .tools-cta span { color: var(--ink-3); font-weight: 600; font-size: 0.9375rem; }
-@media (max-width: 960px) { .tools-grid { grid-template-columns: 1fr; } .tools-list { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) { .tools-list { grid-template-columns: 1fr; } }
+/* téléphone et tablette : la maquette vient sous l'intro et reste collée en haut pendant qu'on fait défiler la liste,
+   chaque exemple qui passe sous elle affiche son écran (idée de Patrick, 07.10) */
+@media (max-width: 960px) {
+  .tools-grid { grid-template-columns: 1fr; grid-template-areas: "intro" "mock" "body"; }
+  .tools-list { grid-template-columns: 1fr; margin-top: 8px; }
+  .tools-body { padding-top: 16px; }
+}
 
 /* Maquette d'interface, dessinée en HTML (pas d'image) */
 .mock { margin: 0; position: sticky; top: 110px; }
@@ -930,7 +936,12 @@ a.case-shot:hover .shot-cta, a.case-shot:focus-visible .shot-cta { background: v
 
 .mock figcaption { margin-top: 14px; font-size: 0.8125rem; color: var(--ink-3); text-align: right; }
 @media (max-width: 1180px) and (min-width: 961px) { #ecran-factures .mock-table td:nth-child(1) { display: none; } }
-@media (max-width: 960px) { .mock { position: static; scroll-margin-top: 110px; } .mock-win { transform: none; } }
+@media (max-width: 960px) {
+  .mock { position: sticky; top: calc(var(--header-h) - 14px); z-index: 5; margin: 20px 0 0; padding: 0 0 12px; background: var(--cream); }
+  .mock-win { transform: none; max-height: 42vh; overflow: hidden; }
+  .mock figcaption { display: none; }
+  .mock-app { min-height: 0; }
+}
 @media (max-width: 520px) {
   .mock-app { grid-template-columns: 1fr; } .mock-nav { display: none; } .mock-table td:nth-child(1) { display: none; }
   .mock-req td:nth-child(1) { display: table-cell; } .mock-req td:nth-child(2) { display: none; }
