@@ -588,8 +588,8 @@ def middle_sections(c):
         % (first, esc(t["mock_note"]), nav, panes, esc(t["mock_note"])))
     H.append(
         '<section class="section tools-sec" id="outils" aria-labelledby="outils-title"><div class="container">'
-        '<div class="tools-grid"><div><div class="reveal">%s<h2 id="outils-title">%s</h2><p class="lede">%s</p></div>'
-        '<ul class="tools-list">%s</ul>'
+        '<div class="tools-grid"><div class="tools-intro reveal">%s<h2 id="outils-title">%s</h2><p class="lede">%s</p></div>'
+        '<div class="tools-body"><ul class="tools-list">%s</ul>'
         '<p class="tools-proof reveal">%s</p>'
         '<div class="tools-cta reveal"><a class="btn btn-primary" href="#contact">%s</a><span>%s</span></div></div>'
         '%s</div></div></section>'
