@@ -163,7 +163,7 @@ method = {
     "principles_title": "Trois règles qu’on s’est fixées",
     "principles": [
         ("Un seul client à la fois", "On ne commence un nouveau projet qu’une fois le précédent livré. Si on est déjà pris, vous rejoignez la liste d’attente et on vous donne une date."),
-        ("Le site est à vous", "Il est hébergé pour quelques francs par an et vous n’êtes lié à aucun abonnement chez nous."),
+        ("Le site est à vous", "Nom de domaine et hébergement compris, il vous coûte environ CHF 100 à 200 par an, et vous n’êtes lié à aucun abonnement chez nous."),
         ("On répond nous-mêmes", "Trois personnes, un numéro. Vous parlez à ceux qui font votre site, pas à un service client."),
     ],
 }
@@ -339,7 +339,7 @@ privacy = {
         ("Hébergement et journaux techniques",
          "<p>Le site est hébergé par Netlify, Inc., San Francisco, États-Unis. Comme tout hébergeur, Netlify peut enregistrer des journaux techniques (adresse IP, type de navigateur, pages demandées, heure de la visite) pour assurer la sécurité et le bon fonctionnement du service, pendant une durée limitée. Ces données peuvent être traitées hors de Suisse. Les règles de Netlify sont décrites dans sa <a href=\"https://www.netlify.com/privacy/\" rel=\"noopener\" target=\"_blank\">politique de confidentialité</a>.</p>"),
         ("Formulaire de contact",
-         "<p>Quand vous utilisez le formulaire, les données que vous saisissez (nom, entreprise, e-mail, téléphone, message) nous sont transmises par e-mail via le service FormSubmit (formsubmit.co). Nous les utilisons uniquement pour vous répondre et, si vous le souhaitez, pour préparer une offre. Elles ne sont ni vendues ni transmises à des tiers. Nous les conservons le temps de nos échanges, puis au plus douze mois après le dernier contact.</p>"),
+         "<p>Quand vous utilisez le formulaire, les données que vous saisissez (nom, entreprise, e-mail, téléphone, message) nous sont transmises par e-mail via le service FormSubmit (formsubmit.co). FormSubmit est un service externe : il reçoit vos données et nous les fait suivre par e-mail. Le message arrive ensuite dans notre boîte Gmail (Google). Ces deux prestataires peuvent traiter les données hors de Suisse, notamment aux États-Unis. Nous utilisons vos données uniquement pour vous répondre et, si vous le souhaitez, pour préparer une offre. Elles ne sont ni vendues ni transmises à d’autres tiers. Nous les conservons le temps de nos échanges, puis au plus douze mois après le dernier contact.</p>"),
         ("WhatsApp et téléphone",
          "<p>Si vous nous écrivez sur WhatsApp, les règles de confidentialité de WhatsApp (Meta) s’appliquent à cet échange. Nous ne conservons vos coordonnées que pour le suivi de votre demande.</p>"),
         ("Polices de caractères et contenus externes",
